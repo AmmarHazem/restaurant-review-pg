@@ -1,8 +1,13 @@
+import "dotenv/config";
 import express from "express";
+import restaurantsRouter from "./routes/restaurants";
 
 const server = express();
 
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
+
+server.use(express.json());
+server.use("/api/restaurants", restaurantsRouter);
 
 async function start() {
   try {

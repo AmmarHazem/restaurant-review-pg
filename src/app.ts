@@ -1,6 +1,8 @@
 import "dotenv/config";
+import "express-async-errors";
 import express from "express";
 import restaurantsRouter from "./routes/restaurants";
+import errorHandlerMiddleware from "./middleware/error-handler-meddileware";
 
 const server = express();
 
@@ -8,6 +10,7 @@ const PORT = process.env.PORT || 8000;
 
 server.use(express.json());
 server.use("/api/restaurants", restaurantsRouter);
+server.use(errorHandlerMiddleware);
 
 async function start() {
   try {

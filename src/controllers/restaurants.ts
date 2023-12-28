@@ -2,12 +2,17 @@ import db from "../db";
 import { RequestHandler } from "express";
 
 export const getRestaurants: RequestHandler<{}, {}, {}> = async (req, res) => {
-  const queryResult = await db.query<{ id: number; name: string }>("SELECT * FROM restaurants");
+  const queryResult = await db.query<{ id: number; name: string }>(
+    "SELECT * FROM restaurants LEFT JOIN (SELECT restaurant_id, COUNT(*), TRUNC(AVG(rating), 1) as avg_rating FROM reviews GROUP BY restaurant_id ) reviews ON restaurants.id = reviews.restaurant_id;"
+  );
   res.json({ count: queryResult.rowCount, restaurants: queryResult.rows });
 };
 
 export const getRestaurantDetails: RequestHandler<{ id: string }, {}, {}> = async (req, res) => {
-  const queryResult = await db.query("SELECT * from restaurants WHERE id = $1", [req.params.id]);
+  const queryResult = await db.query(
+    "SELECT * FROM restaurants LEFT JOIN (SELECT restaurant_id, COUNT(*), TRUNC(AVG(rating), 1) as avg_rating FROM reviews GROUP BY restaurant_id ) reviews ON restaurants.id = reviews.restaurant_id WHERE id = $1;",
+    [req.params.id]
+  );
   if (!queryResult.rowCount) {
     return res.status(404).json({ status: `id ${req.params.id} not found` });
   }
